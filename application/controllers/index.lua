@@ -1,12 +1,13 @@
 local IndexController = {}
 local user_service = require 'models.service.user'
 local aa = require 'aa'
+local log = require 'application.library.log.log'
 
 function IndexController:index()
-    local key = 'test'
-    local key2 = 3632233996
-    local id = key and key2 or 1 
-    ngx.say(key2)
+    ngx.say(print_r(GLOBAL_LOG_BUFFERS['test']))
+    --local log = log:new() 
+    --log:error('11111')
+    ngx.say("index<br>")
     do return user_service:get() .. sprint_r(aa:idevzDo()) end
     local view = self:getView()
     local p = {}
@@ -18,6 +19,7 @@ end
 
 -- curl http://localhost:9110/get?ok=yes
 function IndexController:get()
+    ngx.say("getttttt<br>")
     local get = self:getRequest():getParams()
     print_r(get)
     do return 'get' end
