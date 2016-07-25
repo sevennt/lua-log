@@ -1,30 +1,11 @@
-local config = require "config"
-local bit = require "bit"
-local ffi = require "ffi"
-local ffi_new = ffi.new
-local ffi_str = ffi.string
-local C = ffi.C
-local bor = bit.bor
-
-ffi.cdef[[
-int write(int fd, const char *buf, int nbyte);
-int open(const char *path, int access, int mode);
-int close(int fd);
-]]
-
-local O_RDWR   = 0X0002
-local O_CREAT  = 0x0040
-local O_APPEND = 0x0400
-local S_IRWXU  = 0x01C0
-local S_IRGRP  = 0x0020
-local S_IROTH  = 0x0004
+local config = require "application.library.log.config"
 
 local _M = { _VERSION = '0.1' }
 
 -- 配置日志默认参数
 local options = {
-    fileName = '' -- 当前日志文件名
-    fileFullPath = '' -- 日志文件完整路径
+    fileName = '', -- 当前日志文件名
+    fileFullPath = '', -- 日志文件完整路径
     logLevelThreshold = config.GLOBAL_LOG_LEVEL, -- 默认日志过滤级别
     -- 日志格式：分隔符为 unicode 1
     -- 时间|日志级别|服务ID|模块名|接口名|方法名|关键字|详细信息
@@ -38,22 +19,19 @@ local options = {
 }
 
 local mt = {
-    __index = _M, 
-    options = options
+    __index = _M
 }
--- 全局数组，存放log信息；write到文件并发送至Kafka Server后即重置为空数组
-GLOBAL_LOG_BUFFERS = {}
 
 -- 日志级别对应的数值 
 local LVL = {
-    config.LVL_EMARGENCY = 0,
-    config.LVL_ALERT = 1,
-    config.LVL_CRITICAL = 2,
-    config.LVL_ERROR = 3, 
-    config.LVL_WARNING = 4,
-    config.LVL_NOTICE = 5,
-    config.LVL_INFO = 6,
-    config.LVL_DEBUG = 7
+    [config.LVL_EMARGENCY] = 0,
+    [config.LVL_ALERT] = 1,
+    [config.LVL_CRITICAL] = 2,
+    [config.LVL_ERROR] = 3, 
+    [config.LVL_WARNING] = 4,
+    [config.LVL_NOTICE] = 5,
+    [config.LVL_INFO] = 6,
+    [config.LVL_DEBUG] = 7
 }
 
 local keywordsString = '' 
@@ -64,19 +42,20 @@ local logLineFormat = '';
 -- 日志行关键词替换元素
 -- 时间|日志级别|服务ID|模块名|接口名|方法名|关键字|详细信息
 local logLineKeywords = { 
-    'time' = '', -- 时间字段 替换 %time% 关键词
-    'level' = '', -- 级别字段 替换 %level% 关键词
-    'id' = '', -- 服务ID 替换 %id% 关键词
-    'module' = '', --  模块字段 替换 %module% 关键词
-    'interface' = '', --  接口字段 替换 %interface% 关键词
-    'method' = '', --  方法字段 替换 %method% 关键词
-    'keywords' = '', --  关键词字段 替换 %keyword% 关键词
-    'message' = '', -- 详细信息 替换 %message% 关键词
+    time = '', -- 时间字段 替换 %time% 关键词
+    level = '', -- 级别字段 替换 %level% 关键词
+    id = '', -- 服务ID 替换 %id% 关键词
+    module = '', --  模块字段 替换 %module% 关键词
+    interface = '', --  接口字段 替换 %interface% 关键词
+    method = '', --  方法字段 替换 %method% 关键词
+    keywords = '', --  关键词字段 替换 %keyword% 关键词
+    message = '', -- 详细信息 替换 %message% 关键词
 };
 
 -- new方法，获取log对象
 -- @param options table log配置表
 function _M.new(self, options)
+    ngx.say(print_r(options))
     if options == nil then 
         for k,v in pairs(options) do self.options[k] = v end
     end
@@ -88,9 +67,7 @@ function _M.new(self, options)
     -- 使用ifs接合关键词组成单行日志格式, 提供给后续写入日志时替换关键词
     self.logLineFormat =  table.concat(options.logFormat, config.LOG_IFS)
 
-	return setmetatable({
-		level = level,
-	}, mt)
+    return setmetatable({options = options}, mt)
 end
 local globalKeywords = ''
 
@@ -108,10 +85,10 @@ function _M.setGlobalKeywords(keywords)
     for k,v in pairs(keywords) do
         if type(keywords) == 'table' then
             for key, value in pairs(v) do
-                keywordsString = keywordsString .. config.KEYWORD_IFS .. k .. '=' value 
+                keywordsString = keywordsString .. config.KEYWORD_IFS .. k .. '=' .. value 
             end
         else
-            keywordsString = keywordsString .. config.KEYWORD_IFS .. k .. '=' v 
+            keywordsString = keywordsString .. config.KEYWORD_IFS .. k .. '=' .. v 
         end
     end
     -- 去掉globalKeywords词首的KEYWORD_IFS
@@ -148,10 +125,10 @@ local function formatMessage(level, message, ...)
     -- 生成行级别关键词
     -- 如果传递了args参数，且args最后一个参数是table, 那么就把最后一个识别为行级关键词table处理
     if #args > 0  then 
-        if type(args(#args)) = 'table' then
+        if type(args(#args)) == 'table' then
             for keywords, value in pairs(args(#args)) do
                 -- 如果一个keyword定义了多个value
-                if type(value) = 'table' then
+                if type(value) == 'table' then
                     for k, v in pairs(v) do
                         lineKeywords = lineKeywords .. config.KEYWORD_IFS .. keywords .. '=' .. v 
                     end
@@ -165,13 +142,13 @@ local function formatMessage(level, message, ...)
     self.logLineKeywords.time = ngx.now() * 1000
     self.logLineKeywords.level = string.lowwer(level)
     self.logLineKeywords.message = message 
-    local logLineString = self->logLineFormat
+    local logLineString = self.logLineFormat
     for k, v in pairs(self.logLineKeywords) do
         local fullKeywords = v
         -- 合并关键词
         if k == 'keywords' then
             -- 合并全局级别关键词
-            fullKeywords = .. self.globalKeywords
+            fullKeywords = fullKeywords.. self.globalKeywords
             -- 合并实例化对象级别关键词
             if v ~= nil or v ~= '' then
                 fullKeywords = fullKeywords .. config.KEYWORD_IFS .. v 
@@ -181,13 +158,7 @@ local function formatMessage(level, message, ...)
         end
         string.gsub(logLineString, '%' .. k  .. '%', fullKeywords)
     end
-    return logLineString . "\n";
-end
-
--- 往本地文件写日志，并往Kafka Server发日志
-function _M.wirte(self, file, message)
-    log_fd = C.open(file, bor(O_RDWR, O_CREAT, O_APPEND), bor(S_IRWXU, S_IRGRP, S_IROTH)),
-	C.write(self.log_fd, message, #message);
+    return logLineString .. "\n";
 end
 
 function _M.emargency(self, message, ...)
