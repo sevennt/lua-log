@@ -4,9 +4,9 @@ local aa = require 'aa'
 local log = require 'application.library.log.log'
 
 function IndexController:index()
-    ngx.say(print_r(GLOBAL_LOG_BUFFERS['test']))
-    --local log = log:new() 
-    --log:error('11111')
+    --ngx.say(print_r(GLOBAL_LOG_BUFFERS['test']))
+    local log = log:new() 
+    log:error('11111')
     ngx.say("index<br>")
     do return user_service:get() .. sprint_r(aa:idevzDo()) end
     local view = self:getView()
