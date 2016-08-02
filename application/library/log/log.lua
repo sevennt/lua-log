@@ -70,31 +70,6 @@ function _M.new(self, initOptions)
 end
 local globalKeywords = ''
 
--- 设定全局关键字
--- @param keywords table 
--- keywords = {
---     'keywordName1' = {'keywordContent1', 'keywordContent2'},
---     'keywordName2' = 'keywordContent21'
--- }
--- @return string globalKeywords 全局关键字
-function _M.setGlobalKeywords(self, keywords)
-    if keywords == nil then 
-        return nil
-    end
-    for k,v in pairs(keywords) do
-        if type(keywords) == 'table' then
-            for key, value in pairs(v) do
-                keywordsString = keywordsString .. config.KEYWORD_IFS .. k .. '=' .. value 
-            end
-        else
-            keywordsString = keywordsString .. config.KEYWORD_IFS .. k .. '=' .. v 
-        end
-    end
-    -- 去掉globalKeywords词首的KEYWORD_IFS
-    globalKeywords = string.sub(keywordsString, 2, string.len(keywordsString))
-    return globalKeywords
-end
-
 -- 往全局表LOGS中写入日志信息
 -- @param string level 日志级别
 -- @param string message 日志内容 

@@ -3,6 +3,7 @@ local user_service = require 'models.service.user'
 local bb = require 'bb'
 
 function IdevzController:index()
+	test()
     -- do return user_service:get() .. sprint_r(bb:idevzDo()) end
     local view = self:getView()
     local p = {}
@@ -33,5 +34,32 @@ function IdevzController:api_get()
     print_r(api_get)
     do return 'api_get' end
 end
+function test( )
+	local memcached = require "resty.memcached"
+    local memc,err = memcached:new()
+
+    memc:set_timeout(1000)
+    local ok, err = memc:connect('192.168.1.82', 11211)
+    if not ok then
+        ngx.say(2222222222222)
+        return
+    end
+
+local key = 'zwtest01'
+    local liu = memc:get(key)
+    ngx.say(liu, '-----')
+    if not liu then
+    	--sysutil.print_r(memc)
+        local ok, err = memc:set(key, 'hlj')
+        if not ok then
+            ngx.say(err, '>>>>>')
+            return
+        end
+    end
+    local ok, tag = memc:get(key)
+    ngx.say(ok, '<<<<<<')
+
+end
+
 
 return IdevzController
