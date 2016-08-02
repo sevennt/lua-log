@@ -20,18 +20,17 @@ local S_IROTH  = 0x0004
 
 -- 往本地文件写日志，并往Kafka Server发日志
 local function write2file(file, message)
-    local log_fd = C.open(file, bor(O_RDWR, O_CREAT, O_APPEND), bor(S_IRWXU, S_IRGRP, S_IROTH)),
-    ngx.log(ngx.ERR, file)
-    ngx.log(ngx.ERR, message)
-    --ngx.log(ngx.ERR, #message)
+    local log_fd = C.open(file, bor(O_RDWR, O_CREAT, O_APPEND), bor(S_IRWXU, S_IRGRP, S_IROTH))
 	C.write(log_fd, message, #message);
+    C.close(log_fd)
 end
+
 local function write2kafka(message)
 end
 
-for filePath, log in pairs(GLOBAL_LOG_BUFFERS) do
-    --ngx.log(ngx.ERR, filePath)
-    --ngx.log(ngx.ERR, log)
-    write2file(filePath, log)
-    -- write2kafka(log)
+for file, message in pairs(GLOBAL_LOG_BUFFERS) do
+    if file ~= nil and message ~= nil then
+        write2file(file, message)
+        -- write2kafka(log)
+    end
 end
