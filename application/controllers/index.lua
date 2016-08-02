@@ -4,10 +4,9 @@ local aa = require 'aa'
 local log = require 'application.library.log.log'
 
 function IndexController:index()
-    --ngx.say(print_r(GLOBAL_LOG_BUFFERS['test']))
     local log = log:new() 
     log:error('11111')
-    ngx.say("index<br>")
+    ngx.say(print_r(GLOBAL_LOG_BUFFERS))
     do return user_service:get() .. sprint_r(aa:idevzDo()) end
     local view = self:getView()
     local p = {}
@@ -19,7 +18,6 @@ end
 
 -- curl http://localhost:9110/get?ok=yes
 function IndexController:get()
-    ngx.say("getttttt<br>")
     local get = self:getRequest():getParams()
     print_r(get)
     do return 'get' end

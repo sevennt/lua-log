@@ -1,3 +1,7 @@
+local _dynamicConfig = {
+    -- 全局关键字
+    GLOBAL_KEYWORDS = ''
+}
 local _M = {
     -- 日志级别文案 
     LVL_EMARGENCY = 'emargency',
@@ -8,21 +12,23 @@ local _M = {
     LVL_NOTICE = 'notice',
     LVL_INFO = 'info',
     LVL_DEBUG = 'debug',
-    -- 全局默认日志路径
-    GLOBAL_LOG_FULL_PATH = '/home/leslie/luaLog/logs',
-    -- 全局默认日志级别为info
-    GLOBAL_LOG_LEVEL = 'info',
     -- 日志字段分隔符
     LOG_IFS = "\x01",
     -- 关键词字段分割符
     KEYWORD_IFS = "\x02",
-    -- 全局关键字
-    GLOBAL_KEYWORDS = ''
+    -- 全局默认日志级别为info
+    GLOBAL_LOG_LEVEL = 'info',
+    -- 全局默认日志路径
+    GLOBAL_LOG_FULL_PATH = '/home/www',
 }
 local shared = ngx.shared.logConfig
-local logConfig = shared:get('logConfig')
-function _M.getLogConfig(self, name)
-    return logConfig[name]
+function _M.get(self, name)
+    return shared:get(name)
+end
+function _M.init(self)
+    for k, v in pairs(_dynamicConfig) do
+        shared:set(k, v);
+    end
 end
 -- 设定全局关键字
 -- @param keywords table 

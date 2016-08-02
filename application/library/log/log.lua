@@ -68,7 +68,6 @@ function _M.new(self, initOptions)
         LVL = LVL
     }, mt)
 end
-local globalKeywords = ''
 
 -- 往全局表LOGS中写入日志信息
 -- @param string level 日志级别
@@ -85,7 +84,6 @@ function _M.log(self, level, message, fileName, ...)
     if LVL[level] >= LVL[config.GLOBAL_LOG_LEVEL] or LVL[level] >= LVL[self.options.logLevelThreshold] then 
         return nil
     end
-
     GLOBAL_LOG_BUFFERS[self.options.fileFullPath .. '/' .. fileName] = self.formatMessage(self, level, message, ...) 
 end
 
@@ -120,22 +118,22 @@ function _M.formatMessage(self, level, message, ...)
     self.logLineKeywords.level = level
     self.logLineKeywords.message = message 
     local logLineString = self.logLineFormat
-    local fullKeywords = '' 
     for k, v in pairs(self.logLineKeywords) do
-        ngx.say(k, '====',v)
+        --ngx.say(k, '====',v)
+        local value = v 
         -- 合并关键词
         if k == 'keywords' then
             -- 合并全局级别关键词
-            fullKeywords = v .. config.KEYWORD_IFS .. self.globalKeywords
+            value = v .. config.KEYWORD_IFS .. config:get('GLOBAL_KEYWORDS')
             -- 合并实例化对象级别关键词
             if v ~= nil or v ~= '' then
-                fullKeywords = fullKeywords .. config.KEYWORD_IFS .. v 
+                value = value .. config.KEYWORD_IFS .. v 
             end
             -- 合并行级别关键词
-            fullKeywords = fullKeywords .. config.KEYWORD_IFS .. lineKeywords
+            value = value .. config.KEYWORD_IFS .. lineKeywords
         end
-    --ngx.say(print_r(config.KEYWORD_IFS, fullKeywords))
-        logLineString = ngx.re.gsub(logLineString, '%' .. k  .. '%', fullKeywords)
+        --ngx.say(print_r(config.KEYWORD_IFS, value))
+        logLineString = ngx.re.gsub(logLineString, '%' .. k  .. '%', value)
     end
     return logLineString .. "\n";
 end
