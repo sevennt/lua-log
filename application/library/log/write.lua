@@ -26,11 +26,20 @@ local function write2file(file, message)
 end
 
 local function write2kafka(message)
+	local client = require "resty.kafka.client"
+	local producer = require "resty.kafka.producer"
+	local broker_list = require "application.library.log.kafkaConfig" 
+
+	-- this is async producer_type and bp will be reused in the whole nginx worker
+	local bp = producer:new(broker_list, { producer_type = "async" })
+	local key = "key"
+	local ok, err = bp:send('luaPoint', key, message)
+	return ok, err
 end
 
 for file, message in pairs(GLOBAL_LOG_BUFFERS) do
     if file ~= nil and message ~= nil then
         write2file(file, message)
-        -- write2kafka(log)
+        write2kafka(message)
     end
 end

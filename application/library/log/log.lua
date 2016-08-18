@@ -96,7 +96,6 @@ function _M.formatMessage(self, level, message, ...)
     local lineKeywords = ''
     local argsCount = 0
     local args = {...}
-    local message = ''
     -- 生成行级别关键词
     -- 如果传递了args参数，且args最后一个参数是table, 那么就把最后一个识别为行级关键词table处理
     if #args > 0  then 
@@ -119,7 +118,6 @@ function _M.formatMessage(self, level, message, ...)
     self.logLineKeywords.message = message 
     local logLineString = self.logLineFormat
     for k, v in pairs(self.logLineKeywords) do
-        --ngx.say(k, '====',v)
         local value = v 
         -- 合并关键词
         if k == 'keywords' then
