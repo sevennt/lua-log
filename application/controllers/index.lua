@@ -5,7 +5,7 @@ local log = require 'application.library.log.log'
 
 function IndexController:index()
     local log = log:new() 
-    log:error('11111')
+    log:critical('111111111111')
     ngx.say(print_r(GLOBAL_LOG_BUFFERS))
     do return user_service:get() .. sprint_r(aa:idevzDo()) end
     local view = self:getView()
