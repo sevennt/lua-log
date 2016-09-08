@@ -19,6 +19,6 @@ lua log module
 5.Directives
 ----------
 
-6.Directives
+6.TODO
 ----------
     Add unit test.
