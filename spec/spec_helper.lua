@@ -1,1 +1,0 @@
-require 'vanilla.spec.runner'
