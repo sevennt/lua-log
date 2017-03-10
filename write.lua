@@ -18,9 +18,12 @@ local function write2kafka(message)
 	return ok, err
 end
 
+if type(ngx.ctx['GLOBAL_LOG_BUFFERS']) ~= 'table' then
+    return nil
+end
 for file, messages in pairs(ngx.ctx['GLOBAL_LOG_BUFFERS']) do
     if file ~= nil and messages ~= nil then
-		fileMessages = '' 
+	fileMessages = '' 
         for k,message in pairs(messages) do 
             -- 添加额外信息
             local cjson = require "cjson"
