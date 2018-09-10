@@ -1,24 +1,23 @@
-lua log module
-===================
+# lua log module
 
-1.Description
-----------
-     LuaLog is a log module based on openresty, it will write log on local file and send log message to kafka server.
+## Description
 
-2.Status
-----------
-	Developing.
+ lua-log is a log library based on openresty, it will write log on local file and send log message to kafka server.
 
-3.Version
-----------
-	v 0.01
+## Quick Start
 
-4.Synopsis
-----------
+```bash
+# add follow config into your nginx configuration file
+log_by_lua_file {
+    log.write();
+}
+```
 
-5.Directives
-----------
+```bash
+local logger = log.new()
+log.info("this is an log message")
+```
 
-6.TODO
-----------
-    Add unit test.
+## TODO
+
+Add unit test.

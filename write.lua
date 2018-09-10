@@ -8,23 +8,24 @@ local function write2file(file, messages)
 end
 
 local function write2kafka(message)
-	local client = require "resty.kafka.client"
-	local producer = require "resty.kafka.producer"
-	local broker_list = require "lib.log.kafkaConfig" 
+    local client = require "resty.kafka.client"
+    local producer = require "resty.kafka.producer"
+    local broker_list = require "lib.log.kafkaConfig"
 
-	-- this is async producer_type and bp will be reused in the whole nginx worker
-	local bp = producer:new(broker_list, { producer_type = "async" })
-	local ok, err = bp:send(point, nil, message)
-	return ok, err
+    -- this is async producer_type and bp will be reused in the whole nginx worker
+    local bp = producer:new(broker_list, { producer_type = "async" })
+    local ok, err = bp:send(point, nil, message)
+    return ok, err
 end
 
 if type(ngx.ctx['GLOBAL_LOG_BUFFERS']) ~= 'table' then
     return nil
 end
+
 for file, messages in pairs(ngx.ctx['GLOBAL_LOG_BUFFERS']) do
     if file ~= nil and messages ~= nil then
-	fileMessages = '' 
-        for k,message in pairs(messages) do 
+        fileMessages = ''
+        for k, message in pairs(messages) do
             -- 添加额外信息
             local cjson = require "cjson"
             local util = require "sys.util"
@@ -36,9 +37,9 @@ for file, messages in pairs(ngx.ctx['GLOBAL_LOG_BUFFERS']) do
             message['requestMethod'] = ngx.var.request_method;
             message = cjson.encode(message);
 
-			fileMessages = fileMessages.. message .. "\n"
+            fileMessages = fileMessages .. message .. "\n"
             write2kafka(message)
         end
-		write2file(file, fileMessages)
+        write2file(file, fileMessages)
     end
 end
