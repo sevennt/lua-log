@@ -1,18 +1,10 @@
-language: go
-sudo: false
-matrix:
-  include:
-    # "1.x" always refers to the latest Go version, inc. the patch release.
-    # e.g. "1.x" is 1.11 until 1.11.1 is available.
-    - go: 1.x
-      env: LATEST=true
-
 before_deploy:
   # Set up git user name and tag this commit
   - git config --local user.name "YOUR GIT USER NAME"
   - git config --local user.email "YOUR GIT USER EMAIL"
   - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
   - git tag $TRAVIS_TAG
+
 deploy:
   provider: releases
   skip_cleanup: true
@@ -23,4 +15,3 @@ deploy:
     on:
       repo: sevennt/naftis
       tags: true
-      condition: "$LATEST = true"
