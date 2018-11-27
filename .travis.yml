@@ -6,6 +6,7 @@ matrix:
     # e.g. "1.x" is 1.11 until 1.11.1 is available.
     - go: 1.x
       env: LATEST=true
+
 before_deploy:
   # Set up git user name and tag this commit
   - git config --local user.name "YOUR GIT USER NAME"
@@ -19,7 +20,7 @@ deploy:
     secure: d2L+8/4uM/y6dYxvZQpdMo+KbnoJ6yA0pkEl+xQCZHxLFvIW/hGtq6mIurgJ4C1X0zXD/rl8YHcta+CrSJD0F1yYA4ml/W4I8Ce3eyTHVQ0qHUZ/6XpwH0NK9H9tC70MQEDvi0QxgwJGGYXqYddKzs8KSnB63B8oYoTS77cmOeC/P9pnuRUn3cv+NdiRqJv5u6Ty21Sdkgg1oCJLWyc6DuEpSOjIk+bf7u7HGc9qEjKsThHVXOafr7mZDzDVXGBZG/IucLWjzEoMVJTEEJpxR86aDNNnJ+37yQHuWnRiQHGYMEyCdRn89uddn2npTt1qoPw/bHUOFqjtROEjl3QsNjIMXYASTOUBPi4rq05/SDOjmCYRQXijPt4OeJj6HoJRT4wau9BstQRLjSetX47OprZ/Ax7L7Z1jLo+aP3j8bXit2okle5wJjFg0IHrIhwbmXh04C0UON/mOxYqhkwX/JPjxbSSHw4bjirvxuX1aAZyXDLs5oU7+Wc6JoTuqA0cN4BMIK5CkzeapgBDey4VbJLW9uJErQdIhxWAH4JNsITeBxInslFe3gawt37zt41P083zstmfFdj+tNVksJTGFC1wVvo8IttkMDDbvKR7RXs0UusrdhP/zpun2y3yLNQU4lBySh6Bt3i68RR1muehbX1rHDUvwaZ5rfng/3jmmr+g
     file:
       - logshare.linux.amd64
-    on
+    on:
       repo: sevennt/naftis
       tags: true
       condition: "$LATEST = true"
